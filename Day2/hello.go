@@ -35,81 +35,93 @@ func main() {
 	}
 	fmt.Println("Total number of reports:", len(reports))
 	safeReports := 0
-	unsafeIndexes := map[int]int{}
 	unsafeReports := [][]int{}
-	for row, report := range reports {
-		previousNum := 0
-		safeReport := true
-		isIncrease := true
-		for index, currentNum := range report {
-			if index == 0 {
-				diff := report[1] - currentNum
-				if diff == 0 {
-					safeReport = false
-					break
-				}
-				isIncrease = (report[1] - currentNum) > 0
-			} else if index > 0 {
-				diff := int(math.Abs(float64(currentNum - previousNum)))
-				if diff == 0 {
-					safeReport = false
-				} else if isIncrease {
-					safeReport = currentNum > previousNum && diff <= 3
-				} else if !isIncrease {
-					safeReport = currentNum < previousNum && diff <= 3
-				}
-			}
-			previousNum = currentNum
-			if !safeReport {
-				unsafeIndexes[row] = index
-				unsafeReports = append(unsafeReports, report)
-				break
-			}
-		}
-		if safeReport {
+	for _, report := range reports {
+		if isSafeReport(report, false) {
 			fmt.Println("safe:", report)
+			safeReports++
+		} else {
+			unsafeReports = append(unsafeReports, report)
+		}
+	}
+
+	fmt.Println("completely safe:", safeReports)
+
+	for _, report := range unsafeReports {
+		if isSafeReport(report, true) {
+			fmt.Println("previously unsafe, but now safe:", report)
 			safeReports++
 		}
 	}
 
-	fmt.Println(safeReports)
+	fmt.Println("total safe w/ error correction:", safeReports)
+}
 
-	for row, report := range unsafeReports {
-		previousNum := 0
-		safeReport := true
-		isIncrease := true
-		unSafeIndex := unsafeIndexes[row]
-		for index, currentNum := range report {
-			if index == unSafeIndex {
-				continue
-			}
-			if index == 0 {
-				diff := report[1] - currentNum
-				if diff == 0 {
-					safeReport = false
-					break
-				}
-				isIncrease = (report[1] - currentNum) > 0
-			} else if index > 0 {
-				diff := int(math.Abs(float64(currentNum - previousNum)))
-				if diff == 0 {
-					safeReport = false
-				} else if isIncrease {
-					safeReport = currentNum > previousNum && diff <= 3
-				} else if !isIncrease {
-					safeReport = currentNum < previousNum && diff <= 3
-				}
-			}
+func isSafeReport(report []int, allowUnsafe bool) bool {
+	previousNum := 0
+	safeReport := true
+	trends := []int{}
+	for index, currentNum := range report {
+		if index == 0 {
 			previousNum = currentNum
-			if !safeReport {
-				break
-			}
+			continue
+		} else if index > 0 {
+			trend := currentNum - previousNum
+			trends = append(trends, trend)
+			magnitude := int(math.Abs(float64(trend)))
+			safeReport = allSameSign(trends) && magnitude <= 3 && magnitude > 0
 		}
-		if safeReport {
-			fmt.Println("safe:", report)
-			safeReports++
+		previousNum = currentNum
+		if !safeReport {
+			if allowUnsafe {
+				allowUnsafe = false
+				report1 := removeIndex(report, index)
+				fmt.Println("apply error correction for report:", report)
+				fmt.Println("report1", report1)
+				safeReport = isSafeReport(report1, allowUnsafe)
+				if safeReport {
+					fmt.Println("report1 safe")
+					return safeReport
+				}
+				fmt.Println("report1 not safe")
+				report2 := removeIndex(report, index-1)
+				fmt.Println("report2", report2)
+				safeReport = isSafeReport(report2, allowUnsafe)
+				if safeReport {
+					fmt.Println("report2 safe")
+					return safeReport
+				}
+				fmt.Println("report2 not safe")
+				report3 := removeIndex(report, 0)
+				fmt.Println("report3", report3)
+				safeReport = isSafeReport(report3, allowUnsafe)
+				if safeReport {
+					fmt.Println("report3 safe")
+					return safeReport
+				}
+				fmt.Println("report3 not safe")
+			}
+			break
 		}
 	}
 
-	fmt.Println(safeReports)
+	return safeReport
+}
+
+func removeIndex(slice []int, index int) []int {
+	return append(slice[:index], slice[index+1:]...)
+}
+
+func allSameSign(arr []int) bool {
+	if len(arr) == 0 {
+		return true
+	}
+
+	firstSign := arr[0] > 0
+	for _, num := range arr {
+		if (num > 0) != firstSign && num != 0 {
+			return false
+		}
+	}
+	return true
 }
