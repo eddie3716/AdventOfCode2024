@@ -76,41 +76,31 @@ func isSafeReport(report []int, allowUnsafe bool) bool {
 			if allowUnsafe {
 				allowUnsafe = false
 				fmt.Println("apply error correction for report:", report)
-				for index := len(report) - 1; index >= 0; index-- {
-					newReport := removeIndex(report, index)
-					fmt.Println("newReport", newReport)
-					safeReport = isSafeReport(newReport, allowUnsafe)
-					if safeReport {
-						fmt.Println("newReport safe")
-						return safeReport
-					}
-					fmt.Println("newReport not safe")
+				report1 := removeIndex(report, index)
+				fmt.Println("apply error correction for report:", report)
+				fmt.Println("report1", report1)
+				safeReport = isSafeReport(report1, allowUnsafe)
+				if safeReport {
+					fmt.Println("report1 safe")
+					return safeReport
 				}
-				// report1 := removeIndex(report, index)
-				// fmt.Println("apply error correction for report:", report)
-				// fmt.Println("report1", report1)
-				// safeReport = isSafeReport(report1, allowUnsafe)
-				// if safeReport {
-				// 	fmt.Println("report1 safe")
-				// 	return safeReport
-				// }
-				// fmt.Println("report1 not safe")
-				// report2 := removeIndex(report, index-1)
-				// fmt.Println("report2", report2)
-				// safeReport = isSafeReport(report2, allowUnsafe)
-				// if safeReport {
-				// 	fmt.Println("report2 safe")
-				// 	return safeReport
-				// }
-				// fmt.Println("report2 not safe")
-				// report3 := removeIndex(report, 0)
-				// fmt.Println("report3", report3)
-				// safeReport = isSafeReport(report3, allowUnsafe)
-				// if safeReport {
-				// 	fmt.Println("report3 safe")
-				// 	return safeReport
-				// }
-				// fmt.Println("report3 not safe")
+				fmt.Println("report1 not safe")
+				report2 := removeIndex(report, index-1)
+				fmt.Println("report2", report2)
+				safeReport = isSafeReport(report2, allowUnsafe)
+				if safeReport {
+					fmt.Println("report2 safe")
+					return safeReport
+				}
+				fmt.Println("report2 not safe")
+				report3 := removeIndex(report, 0)
+				fmt.Println("report3", report3)
+				safeReport = isSafeReport(report3, allowUnsafe)
+				if safeReport {
+					fmt.Println("report3 safe")
+					return safeReport
+				}
+				fmt.Println("report3 not safe")
 			}
 			break
 		}
