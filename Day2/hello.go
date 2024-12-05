@@ -49,7 +49,7 @@ func main() {
 
 	for _, report := range unsafeReports {
 		if isSafeReport(report, true) {
-			fmt.Println("previously unsafe, but now safe:", report)
+			fmt.Println("unsafe, but now safe:", report)
 			safeReports++
 		}
 	}
@@ -65,41 +65,52 @@ func isSafeReport(report []int, allowUnsafe bool) bool {
 		if index == 0 {
 			previousNum = currentNum
 			continue
-		} else if index > 0 {
-			trend := currentNum - previousNum
-			trends = append(trends, trend)
-			magnitude := int(math.Abs(float64(trend)))
-			safeReport = allSameSign(trends) && magnitude <= 3 && magnitude > 0
 		}
+		trend := currentNum - previousNum
+		trends = append(trends, trend)
+		magnitude := int(math.Abs(float64(trend)))
+		safeReport = allSameSign(trends) && magnitude <= 3 && magnitude > 0
 		previousNum = currentNum
+
 		if !safeReport {
 			if allowUnsafe {
 				allowUnsafe = false
-				report1 := removeIndex(report, index)
 				fmt.Println("apply error correction for report:", report)
-				fmt.Println("report1", report1)
-				safeReport = isSafeReport(report1, allowUnsafe)
-				if safeReport {
-					fmt.Println("report1 safe")
-					return safeReport
+				for index := len(report) - 1; index >= 0; index-- {
+					newReport := removeIndex(report, index)
+					fmt.Println("newReport", newReport)
+					safeReport = isSafeReport(newReport, allowUnsafe)
+					if safeReport {
+						fmt.Println("newReport safe")
+						return safeReport
+					}
+					fmt.Println("newReport not safe")
 				}
-				fmt.Println("report1 not safe")
-				report2 := removeIndex(report, index-1)
-				fmt.Println("report2", report2)
-				safeReport = isSafeReport(report2, allowUnsafe)
-				if safeReport {
-					fmt.Println("report2 safe")
-					return safeReport
-				}
-				fmt.Println("report2 not safe")
-				report3 := removeIndex(report, 0)
-				fmt.Println("report3", report3)
-				safeReport = isSafeReport(report3, allowUnsafe)
-				if safeReport {
-					fmt.Println("report3 safe")
-					return safeReport
-				}
-				fmt.Println("report3 not safe")
+				// report1 := removeIndex(report, index)
+				// fmt.Println("apply error correction for report:", report)
+				// fmt.Println("report1", report1)
+				// safeReport = isSafeReport(report1, allowUnsafe)
+				// if safeReport {
+				// 	fmt.Println("report1 safe")
+				// 	return safeReport
+				// }
+				// fmt.Println("report1 not safe")
+				// report2 := removeIndex(report, index-1)
+				// fmt.Println("report2", report2)
+				// safeReport = isSafeReport(report2, allowUnsafe)
+				// if safeReport {
+				// 	fmt.Println("report2 safe")
+				// 	return safeReport
+				// }
+				// fmt.Println("report2 not safe")
+				// report3 := removeIndex(report, 0)
+				// fmt.Println("report3", report3)
+				// safeReport = isSafeReport(report3, allowUnsafe)
+				// if safeReport {
+				// 	fmt.Println("report3 safe")
+				// 	return safeReport
+				// }
+				// fmt.Println("report3 not safe")
 			}
 			break
 		}
@@ -109,7 +120,10 @@ func isSafeReport(report []int, allowUnsafe bool) bool {
 }
 
 func removeIndex(slice []int, index int) []int {
-	return append(slice[:index], slice[index+1:]...)
+	newSlice := make([]int, len(slice)-1)
+	copy(newSlice, slice[:index])
+	copy(newSlice[index:], slice[index+1:])
+	return newSlice
 }
 
 func allSameSign(arr []int) bool {
